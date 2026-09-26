@@ -111,7 +111,7 @@ export class LeadsService {
           [u.tenantId, id],
         )
       ).rows;
-      await this.db.audit(q, u.tenantId!, u.sub, "lead.view", "lead", id);
+      await this.db.audit(q, u.tenantId!, u.sub, "lead.view", "lead", id, {}, u.ip);
       return { 
         ...this.row(l), 
         tags, 
@@ -245,7 +245,7 @@ export class LeadsService {
         "INSERT INTO activities(tenant_id,lead_id,user_id,type,body) VALUES($1,$2,$3,'created','Lead created')",
         [u.tenantId, l.id, tenantUserId(u)],
       );
-      await this.db.audit(q, u.tenantId!, u.sub, "lead.created", "lead", l.id);
+      await this.db.audit(q, u.tenantId!, u.sub, "lead.created", "lead", l.id, {}, u.ip);
       return this.row(l);
     });
   }
@@ -350,7 +350,7 @@ export class LeadsService {
         await this.transferRelated(q, u, id, old.owner_id, owner);
       await this.db.audit(q, u.tenantId!, u.sub, "lead.updated", "lead", id, {
         fields: Object.keys(b),
-      });
+      }, u.ip);
       return this.row(l);
     });
   }
@@ -382,6 +382,7 @@ export class LeadsService {
           "lead",
           id,
           { from: old.owner_id, to: target },
+          u.ip,
         );
       }
       return { ok: true };
@@ -414,6 +415,8 @@ export class LeadsService {
         "activity.created",
         "lead",
         id,
+        {},
+        u.ip,
       );
       return r.rows[0];
     });
@@ -437,7 +440,7 @@ export class LeadsService {
         u.tenantId,
         id,
       ]);
-      await this.db.audit(q, u.tenantId!, u.sub, "lead.deleted", "lead", id);
+      await this.db.audit(q, u.tenantId!, u.sub, "lead.deleted", "lead", id, {}, u.ip);
       return { ok: true };
     });
   }

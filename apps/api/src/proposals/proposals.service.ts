@@ -300,6 +300,7 @@ export class ProposalsService {
           templateVersion: template.version,
           approvalRequired: requires,
         },
+        u.ip,
       );
       return p;
     });
@@ -402,6 +403,7 @@ export class ProposalsService {
         "proposal",
         id,
         { note: b.note || "" },
+        u.ip,
       );
       return r.rows[0];
     });
@@ -409,7 +411,7 @@ export class ProposalsService {
   async document(u: any, id: string) {
     const p = await this.one(u, id);
     await this.db.tenant(u.tenantId, u.sub, (q) =>
-      this.db.audit(q, u.tenantId, u.sub, "proposal.exported", "proposal", id),
+      this.db.audit(q, u.tenantId, u.sub, "proposal.exported", "proposal", id, {}, u.ip),
     );
     return renderProposal(p, u.tenantName);
   }

@@ -142,6 +142,8 @@ export class UsersService {
         "user.created",
         "user",
         user.id,
+        {},
+        u.ip,
       );
       return user;
     });
@@ -218,7 +220,7 @@ export class UsersService {
       );
       await this.db.audit(q, u.tenantId!, u.sub, "user.updated", "user", id, {
         fields: Object.keys(b).filter((k) => k !== "password"),
-      });
+      }, u.ip);
       return { ok: true };
     });
   }
@@ -320,6 +322,7 @@ export class UsersService {
         "user",
         id,
         { replacementId, leads: leads.rowCount, tasks: tasks.rowCount },
+        u.ip,
       );
       return {
         ok: true,
@@ -385,6 +388,7 @@ export class UsersService {
         "role",
         id,
         { authority, permissions: b.permissions },
+        u.ip,
       );
       return { ok: true };
     });
@@ -431,6 +435,7 @@ export class UsersService {
         "user",
         id,
         { policy },
+        u.ip,
       );
       return { ok: true };
     });
@@ -466,6 +471,7 @@ export class UsersService {
         "user",
         id,
         { managerId: b.managerId },
+        u.ip,
       );
       return { ok: true };
     });

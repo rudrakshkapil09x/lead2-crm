@@ -20,6 +20,7 @@ import {
 } from "../common/permissions";
 import * as v from "../common/validation";
 import { seedTenant } from "./seed";
+import { CryptoService } from "../common/crypto.service";
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private jwt: JwtService,
     private mail: MailService,
     private mfa: MfaService,
+    private crypto: CryptoService,
   ) {}
 
   private slug(x: any) {
@@ -162,7 +164,11 @@ export class AuthService {
     if (!user || !user.mfa_secret)
       throw new UnauthorizedException("MFA not configured");
 
-    if (!this.mfa.verify(user.mfa_secret, String(b.totpCode || "")))
+    // Decrypt the secret before verifying
+    const plainSecret = this.crypto.decrypt(user.mfa_secret);
+    if (!plainSecret) throw new UnauthorizedException("MFA secret corrupted");
+
+    if (!this.mfa.verify(plainSecret, String(b.totpCode || "")))
       throw new UnauthorizedException("Invalid authenticator code");
 
     // Invalidate challenge
@@ -184,8 +190,10 @@ export class AuthService {
     ).rows[0];
     const { secret, otpAuthUrl } = this.mfa.generateSecret(row.email);
     const qrDataUrl = await this.mfa.generateQrDataUrl(otpAuthUrl);
-    // Store temporarily — only committed on enable
-    await this.db.query(`UPDATE ${table} SET mfa_secret=$2 WHERE id=$1`, [u.sub, secret]);
+    // Encrypt before storing — only the plaintext secret goes to the client for QR scanning
+    const encryptedSecret = this.crypto.encrypt(secret)!;
+    await this.db.query(`UPDATE ${table} SET mfa_secret=$2 WHERE id=$1`, [u.sub, encryptedSecret]);
+    // Return plaintext secret so the user can enter it manually if needed
     return { secret, qrDataUrl };
   }
 
@@ -196,7 +204,10 @@ export class AuthService {
     ).rows[0];
     if (!row?.mfa_secret)
       throw new BadRequestException("Set up MFA first with GET /auth/mfa/setup");
-    if (!this.mfa.verify(row.mfa_secret, String(b.totpCode || "")))
+    // Decrypt secret before verifying the submitted TOTP code
+    const plainSecret = this.crypto.decrypt(row.mfa_secret);
+    if (!plainSecret) throw new BadRequestException("MFA secret corrupted — set up MFA again");
+    if (!this.mfa.verify(plainSecret, String(b.totpCode || "")))
       throw new BadRequestException("Invalid code — try again");
     await this.db.query(
       `UPDATE ${table} SET mfa_enabled=true WHERE id=$1`,

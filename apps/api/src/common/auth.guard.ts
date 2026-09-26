@@ -76,6 +76,7 @@ export class AuthGuard implements CanActivate {
         tenantName: tenant?.name,
         tenantSlug: tenant?.slug,
         currency: tenant?.settings?.currency || "INR",
+        ip: req.ip,
       };
     } else {
       if (!claim.tenantId) throw new UnauthorizedException();
@@ -128,6 +129,7 @@ export class AuthGuard implements CanActivate {
         platformAdmin: false,
         tokenVersion: data.token_version,
         mustChangePassword: data.must_change_password,
+        ip: req.ip,
       };
       if (
         data.must_change_password &&

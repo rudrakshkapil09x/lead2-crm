@@ -24,4 +24,6 @@ export type RequestUser = {
   platformAdmin: boolean;
   tokenVersion: number;
   mustChangePassword?: boolean;
+  /** Client IP captured by the auth guard — used for audit log entries */
+  ip?: string;
 };

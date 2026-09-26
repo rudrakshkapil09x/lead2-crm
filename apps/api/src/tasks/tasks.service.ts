@@ -86,7 +86,7 @@ export class TasksService {
           recurrence,
         ],
       );
-      await this.db.audit(q, u.tenantId, u.sub, "task.created", "task", r.rows[0].id);
+      await this.db.audit(q, u.tenantId, u.sub, "task.created", "task", r.rows[0].id, {}, u.ip);
 
       // Email assignee if different from creator
       if (assignee !== u.sub) {
@@ -118,7 +118,7 @@ export class TasksService {
         "UPDATE tasks SET status='completed',completed_at=now() WHERE tenant_id=$1 AND id=$2 RETURNING *",
         [u.tenantId, id],
       );
-      await this.db.audit(q, u.tenantId, u.sub, "task.completed", "task", id);
+      await this.db.audit(q, u.tenantId, u.sub, "task.completed", "task", id, {}, u.ip);
 
       // BUG-07: if recurring, spawn the next occurrence
       if (t.recurrence_rule && t.due_at) {
