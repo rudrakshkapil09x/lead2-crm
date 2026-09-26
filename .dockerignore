@@ -1,0 +1,13 @@
+.git
+**/node_modules
+**/.next
+**/dist
+**/dist-demo
+**/dist-test
+**/*.tsbuildinfo
+**/coverage
+.env
+.env.*
+*.zip
+backups
+verification

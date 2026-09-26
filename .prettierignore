@@ -1,0 +1,8 @@
+node_modules
+**/.next
+**/dist
+**/dist-demo
+**/dist-test
+**/*.tsbuildinfo
+package-lock.json
+PRODUCT_SPEC.md

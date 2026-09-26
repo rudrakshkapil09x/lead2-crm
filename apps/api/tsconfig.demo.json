@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.test.json",
+  "compilerOptions": {
+    "outDir": "./dist-demo"
+  },
+  "include": ["src/**/*.ts", "test/db-harness.ts", "test/demo-server.ts"]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@lead2/web",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack -p 3000 -H 127.0.0.1",
+    "build": "next build --webpack",
+    "start": "next start -p 3000",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "papaparse": "^5.5.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "lucide-react": "^0.577.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/papaparse": "^5.3.16",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.9.0"
+  }
+}

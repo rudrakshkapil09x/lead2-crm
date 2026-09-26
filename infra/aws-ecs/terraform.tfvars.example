@@ -1,0 +1,15 @@
+aws_region      = "ap-south-1"
+environment     = "production"
+domain_name     = "crm.yourdomain.com"   # ← replace with your real domain
+ses_from_email  = "no-reply@yourdomain.com"
+db_instance     = "db.t3.medium"
+db_multi_az     = true
+api_cpu         = 512
+api_memory      = 1024
+web_cpu         = 256
+web_memory      = 512
+# Sensitive values — pass via environment or GitHub Secrets, NOT committed:
+# db_password        = ""
+# db_app_password    = ""
+# google_client_id   = ""
+# google_client_secret = ""

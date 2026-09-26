@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: crm_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/generate-env.sh}
+      CRM_APP_PASSWORD: ${CRM_APP_PASSWORD:?Run scripts/generate-env.sh}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./apps/api/db/000-app-role.sh:/docker-entrypoint-initdb.d/000-app-role.sh:ro
+      - ./apps/api/db/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./apps/api/db/migrations/003-lead2.sql:/docker-entrypoint-initdb.d/003-lead2.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm_owner -d crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://crm_app:${CRM_APP_PASSWORD}@postgres:5432/crm
+      PORT: 4000
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        API_INTERNAL_URL: http://api:4000
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+volumes:
+  pgdata:
